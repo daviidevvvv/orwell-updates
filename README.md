@@ -1,3 +1,3 @@
 # Orwell App Updates
 
-Canale pubblico per gli aggiornamenti dell'interfaccia e degli eseguibili desktop di **Orwell** (privo di credenziali o configurazioni NVR).
+Orwell 1.2.1 usa il frontend desktop nativo GPUI. Gli utenti di Orwell possono aggiornare dal pulsante â†‘. Il canale include il manifesto, l'eseguibile GPUI e i file per migrare le installazioni precedenti.

@@ -1,16 +1,12 @@
 param(
     [Parameter(Mandatory = $true)][string]$AppRoot,
     [int]$CallerPid = 0,
-    [string]$LauncherExe = 'Telecamere.exe'
+    [string]$LauncherExe = 'Orwell.exe'
 )
 
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $ProgressPreference = 'SilentlyContinue'
-
-if ($LauncherExe -notin @('Telecamere.exe', 'Orwell.exe')) {
-    $LauncherExe = 'Telecamere.exe'
-}
 
 $authPath = Join-Path $AppRoot 'bin\update-auth.json'
 $usePrivateAuth = $false
@@ -65,7 +61,7 @@ try {
         Copy-Item -LiteralPath $localPresets -Destination $presetsBackup -Force
     }
 
-    foreach ($sub in @('web', 'assets', 'docs', 'tools', 'src', 'tauri-ui')) {
+    foreach ($sub in @('web', 'assets', 'tools')) {
         $fromSub = Join-Path $srcRoot $sub
         if (Test-Path -LiteralPath $fromSub -PathType Container) {
             $toSub = Join-Path $AppRoot $sub
@@ -79,16 +75,11 @@ try {
         Remove-Item -LiteralPath $presetsBackup -Force -ErrorAction SilentlyContinue
     }
 
-    foreach ($rootFile in @('Avvia_Telecamere.bat', 'Avvia_Orwell.bat', 'README.md', '.gitattributes', '.gitignore')) {
+    foreach ($rootFile in @('Avvia_Orwell.bat', 'README.md')) {
         $fromFile = Join-Path $srcRoot $rootFile
         if (Test-Path -LiteralPath $fromFile -PathType Leaf) {
             Copy-Item -LiteralPath $fromFile -Destination (Join-Path $AppRoot $rootFile) -Force
         }
-    }
-
-    $srcYaml = Join-Path $srcRoot 'bin\go2rtc.yaml'
-    if (Test-Path -LiteralPath $srcYaml -PathType Leaf) {
-        Copy-Item -LiteralPath $srcYaml -Destination (Join-Path $AppRoot 'bin\go2rtc.yaml') -Force
     }
 
     function Get-FileSha256Hex([string]$Path) {
@@ -108,9 +99,7 @@ try {
     # Check if compiled executables changed (need detached process swap + restart)
     $stagedMoves = @()
     $binaryChecks = @(
-        @{ SrcRel = 'Telecamere.exe'; DstRel = 'Telecamere.exe'; Staged = (Join-Path $env:TEMP ("Telecamere.{0}.new.exe" -f $PID)) },
-        @{ SrcRel = 'Orwell.exe'; DstRel = 'Orwell.exe'; Staged = (Join-Path $env:TEMP ("Orwell.{0}.new.exe" -f $PID)) },
-        @{ SrcRel = 'bin\ClipExporter.exe'; DstRel = 'bin\ClipExporter.exe'; Staged = (Join-Path $env:TEMP ("ClipExporter.{0}.new.exe" -f $PID)) }
+        @{ SrcRel = 'Orwell.exe'; DstRel = 'Orwell.exe'; Staged = (Join-Path $env:TEMP ("Orwell.{0}.new.exe" -f $PID)) }
     )
     foreach ($bin in $binaryChecks) {
         Remove-Item -LiteralPath $bin.Staged -Force -ErrorAction SilentlyContinue
@@ -126,20 +115,9 @@ try {
         }
     }
 
-    # Keep git index aligned on machines that also have git installed
-    if ((Test-Path -LiteralPath (Join-Path $AppRoot '.git')) -and (Get-Command git.exe -ErrorAction SilentlyContinue)) {
-        try {
-            & git.exe -C $AppRoot fetch origin $branch 2>$null
-            if ($LASTEXITCODE -eq 0) {
-                & git.exe -C $AppRoot reset --hard "origin/$branch" 2>$null
-            }
-        } catch {
-        }
-    }
-
     if ($stagedMoves.Count -gt 0) {
         $swapScriptPath = Join-Path $env:TEMP ("tb_apply_exe_{0}.ps1" -f $PID)
-        $restartTarget = Join-Path $AppRoot $LauncherExe
+        $restartTarget = Join-Path $AppRoot 'Orwell.exe'
         $movesJson = ($stagedMoves | ConvertTo-Json -Compress)
         $escMoves = $movesJson.Replace("'", "''")
         $escRoot = $AppRoot.Replace("'", "''")
