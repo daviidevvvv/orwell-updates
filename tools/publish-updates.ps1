@@ -63,7 +63,8 @@ $readme = @(
 [IO.File]::WriteAllText((Join-Path $Checkout 'README.md'), $readme, [Text.UTF8Encoding]::new($false))
 $publish = $files + @('README.md', 'assets/brand', 'assets/Outfit-OFL.txt')
 Invoke-Git -C $Checkout add -- @publish
-$allowed = $publish -replace '\\','/'
+# The public channel maintains these policy files in its own checkout.
+$allowed = ($publish -replace '\\','/') + @('AGENTS.md', 'CI_RESOURCE_POLICY.md')
 $unexpected = Invoke-Git -C $Checkout ls-files | Where-Object {
     $_ -notin $allowed -and $_ -notmatch '^assets/brand/[^/]+\.(png|webp|ico)$'
 }

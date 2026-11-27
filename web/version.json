@@ -1,5 +1,5 @@
 {
-    "version":  "1.2.1",
-    "frontend":  "gpui",
-    "sha256":  "7f0797e75517ccc86e7723c91c3bf3fe3dac1a28e2d371615970ed769c336713"
+  "version": "1.2.2",
+  "frontend": "gpui",
+  "sha256": "54c7078da0c69c391a49973d47e7efc6088fd6fd774874addddf98796fea883d"
 }
